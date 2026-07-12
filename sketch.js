@@ -1,4 +1,3 @@
-// 1. BAGIAN ATAS: Deklarasi variabel
 let pg;
 let points = [];
 let dotImages = []; 
@@ -8,28 +7,24 @@ let video;
 let handpose;
 let hands = []; 
 let currentSubtitle = "Lambaikan tanganmu ke kamera...";
-let marqueeX = 0; // <-- BARU: Variabel untuk mencatat posisi X teks berjalan
+let marqueeX = 0;
 
-//variabel fotonich
+//varia pict
 let gestureImages = {
   wave: [],
   thumbs: [],
   love: [],
   typing: []
 };
-
-//gesture aktif default
 let currentGesture = "wave";
 
-// 2. BAGIAN PRELOAD
 function preload() {
   customFontSub = loadFont('assets/fonts/RemoraCorp.otf');
   customFont = loadFont('assets/fonts/amFont.ttf');
   for (let i = 0; i < 6; i++) {
     dotImages[i] = loadImage('assets/images/dot' + i + '.png');
   }
-  // Load Foto Ari berdasarkan struktur folder 'pict/' kamu
-  // Catatan: ekstensi disesuaikan presisi sesuai screenshot folder kamu
+  // load foto ayang
   gestureImages.love[0] = loadImage('pict/love0.jpg');
   gestureImages.love[1] = loadImage('pict/love1.jpg');
   gestureImages.love[2] = loadImage('pict/love2.jpg');
@@ -47,42 +42,35 @@ function preload() {
 
   gestureImages.wave[0] = loadImage('pict/wave0.jpg');
   gestureImages.wave[1] = loadImage('pict/wave1.jpg');
-  gestureImages.wave[2] = loadImage('pict/wave2.jpg'); // Menggunakan .PNG sesuai screenshot kamu
+  gestureImages.wave[2] = loadImage('pict/wave2.jpg');
   gestureImages.wave[3] = loadImage('pict/wave3.jpg');
 }
 
-// 3. BAGIAN SETUP
 function setup() {
-  // Set webgl backend di paling atas agar stabil
+  // Set webgl incase gastabil
   ml5.setBackend('webgl');  
   
   createCanvas(windowWidth, windowHeight);
-  
-  // Nyalain webcam
   video = createCapture(VIDEO);
   video.size(320, 240); 
   video.hide(); 
   
-  // Konfigurasi model handpose
+  //model handpose
   let handposeOptions = {
     maxHands: 2,
     flipped: false
   };
-
-  // PERBAIKAN: Hanya daftarkan modelLoaded di sini. TIDAK MEMANGGIL detectStart langsung!
   handpose = ml5.handPose(handposeOptions, modelLoaded);
   
-  // Area canvas tersembunyi untuk scan huruf
   pg = createGraphics(800, 300);
   pg.fill(255);
   pg.textSize(300); 
   pg.textFont(customFont); 
   pg.textAlign(CENTER, CENTER);
   
-  let gridSpacing = 12; // Kerapatan polkadot disesuaikan agar performa browser lancar
+  let gridSpacing = 12; //polkawars
   let letterSpacing = 160;
   
-  // Menggunakan huruf kapital 'A', 'R', 'I' agar hasil scan tebal & jelas
   let letters = [
     { char: 'a', offsetX: -letterSpacing, imgRange: [0, 1] }, 
     { char: 'r', offsetX: 15,             imgRange: [2, 3] }, 
@@ -99,11 +87,8 @@ function setup() {
         let c = pg.get(x, y);
         if (red(c) === 255) {
           let imgIndex = floor(random(l.imgRange[0], l.imgRange[1] + 1));
-          
-          // Pemetaan koordinat agar pas tepat di tengah-tengah layar monitor kamu
           let targetX = map(x, 0, pg.width, width / 2 - 400, width / 2 + 400);
           let targetY = map(y, 0, pg.height, height / 7 - 150, height / 7 + 150);
-          
           let startX = random(-100, width + 100);
           let startY = random(-100, height + 100);
           points.push({ targetX: targetX, targetY: targetY, currentX: startX, currentY: startY, id: imgIndex });
@@ -111,44 +96,38 @@ function setup() {
       }
     }
   }
-  console.log("Jumlah titik polkadot ter-scan:", points.length);
+  console.log("Scanning polkadot:", points.length);
 }
-
-// Fungsi callback saat model AI siap
 function modelLoaded() {
   console.log("Model Handpose berhasil dimuat! Memulai deteksi...");
-  // Deteksi SECARA RESMI baru dinyalakan di sini satu kali saja!
   handpose.detectStart(video, gotHands);
 }
 
-// 4. BAGIAN DRAW
 function draw() {
-  // BARU: UBAH WARNA BACKGROUND BERDASARKAN GESTURE
-  // ========================================================
-  if (currentGesture === "wave") {
-    background('#FFAFB0'); // Pink
+   if (currentGesture === "wave") {
+    background('#FFAFB0'); //pink
   } else if (currentGesture === "typing") {
-    background('#4B2323'); // Coklat
+    background('#4B2323'); //brown
   } else if (currentGesture === "love") {
-    background('#6E1527'); // Merah
+    background('#6E1527'); //red
   } else if (currentGesture === "thumbs") {
-    background('#E1E946'); // Kuning
+    background('#E1E946'); //yellow
   }
   
-  // Jalankan pengecekan gestur tangan
+  // ceki handgesture
   checkGestures(); 
 
   let mx = mouseX;
   let my = mouseY;
 
-  let isScattered = false; //sementara biar tulisan selalu rapi 
-  let easeSpeed = 0.05;    //sementara biar transisi kumpulnya stabil cepat
+  let isScattered = false;
+  let easeSpeed = 0.05;
   
 //   let cycleTime = millis() % 4000;
 //   let isScattered = (cycleTime < 1500); 
 //   let easeSpeed = isScattered ? 0.02 : 0.05; 
 
-  // Menggambar & menggerakkan Polkadot ARI
+  //gerak gambar polka
   for (let i = 0; i < points.length; i++) {
     let p = points[i];
     
@@ -182,20 +161,20 @@ function draw() {
     image(dotImages[p.id], p.currentX - dotSize/2, p.currentY - dotSize/2, dotSize, dotSize);
   }
 
-  // Tampilan Subtitle Dinamis
+  //subs
   fill(0); 
   noStroke();
   textSize(50); 
   if (currentGesture === "typing" || currentGesture === "love") {
-    fill(255); // Pakai teks putih jika background gelap
+    fill(255); //cobaan hideung
   } else {
-    fill(0);   // Pakai teks hitam jika background terang (wave/thumbs)
+    fill(0); 
   }
   textFont(customFontSub); 
   textAlign(CENTER, CENTER);
   text(currentSubtitle, width / 2, height / 3 + 50);
 
-  // Kotak Kamera Webcam
+  //webcam
   let camW = 300; 
   let camH = 250; 
   let camX = width / 2 - camW / 2; 
@@ -212,78 +191,61 @@ function draw() {
   strokeWeight(5);
   rect(camX, camY, camW, camH, 10); 
 
-  // Gambar titik pelacak sendi jari di atas webcam
+  //handpoints
   // drawHandPoints(camX, camY, camW, camH);
   
 
-  //logika gambar
+  //logic img
   // let imgW = 180; // Lebar foto estetik
   // let imgH = 260; // Tinggi foto potret (portrait)
 
-  // Ambil list 4 foto dari gesture yang sedang aktif saat ini
-  let activePhotos = gestureImages[currentGesture];
-
-  // Pastikan foto-fotonya sudah selesai dimuat sebelum digambar agar tidak eror
+  let activePhotos = gestureImages[currentGesture]; 
   if (activePhotos && activePhotos.length === 4 && activePhotos[0]) {
-   // ATUR LEBAR UTAMA DI SINI (Ubah angka ini untuk membesarkan/mengecilkan)
-    let w1 = 200; // Lebar foto 1 (Kiri Luar)
-    let w2 = 180; // Lebar foto 2 (Kiri Dalam)
-    let w3 = 180; // Lebar foto 3 (Kanan Dalam)
-    let w4 = 150; // Lebar foto 4 (Kanan Luar)
+   
+    let w1 = 200; //img 1 (left out)
+    let w2 = 180; //img 2 (left in)
+    let w3 = 180; //img 3 (right in)
+    let w4 = 150; //img 4 (right out)
 
-    // Foto 1: Sisi Kiri Luar (Agak ke atas)
+    //img 1
     let h1 = (activePhotos[0].height / activePhotos[0].width) * w1;
     image(activePhotos[0], camX - 550, camY - 85, w1, h1);
     
-    // Foto 2: Sisi Kiri Dalam (Agak ke bawah mendekati kamera)
+    //img 2
     let h2 = (activePhotos[1].height / activePhotos[1].width) * w2;
     image(activePhotos[1], camX - 250, camY, w2, h2);
     
-    // Foto 3: Sisi Kanan Dalam (Agak ke bawah mendekati kamera)
+    //img 3
     let h3 = (activePhotos[2].height / activePhotos[2].width) * w3;
     image(activePhotos[2], camX + camW + 90, camY + -30, w3, h3);
     
-    // Foto 4: Sisi Kanan Luar (Agak ke atas tinggi)
+    //img 4
     let h4 = (activePhotos[3].height / activePhotos[3].width) * w4;
     image(activePhotos[3], camX + camW + 350, camY - 20, w4, h4);
   }
   push();
-  // 1. Tentukan warna teks (menyesuaikan warna background dinamis kamu)
-  if (currentGesture === "typing" || currentGesture === "love") {
-    fill(255); // Teks putih jika background gelap (coklat/merah)
+    if (currentGesture === "typing" || currentGesture === "love") {
+    fill(255); 
   } else {
-    fill(0);   // Teks hitam jika background terang (pink/kuning)
+    fill(0);   
   }
   
   noStroke();
-  textSize(30); // Ukuran teks running sedikit lebih kecil agar proporsional
+  textSize(30);
   textFont(customFontSub);
-  textAlign(LEFT, CENTER); // Rata kiri agar perhitungan jalannya rapi
+  textAlign(LEFT, CENTER);
   
   let marqueeText = "Final round, final laugh. BIIRU - Not A Sushibar, July 13 – Ari’s farewell bash!";
-  
-  // 2. Gambar teks di posisi marqueeX, dengan posisi vertikal Y di dekat batas bawah layar
   text(marqueeText, marqueeX, height - 50);
-  
-  // 3. Kurangi nilai marqueeX untuk menggeser teks ke arah kiri
-  marqueeX -= 3.5; // Ganti angka 2.5 jika ingin jalannya lebih cepat/lambat
-  
-  // 4. Jika teks sudah sepenuhnya keluar dari layar sebelah kiri, reset posisinya kembali ke ujung kanan layar
-  // textWidth() menghitung total lebar piksel teks asli kamu
+  marqueeX -= 3.5;
+  // textWidth()
   if (marqueeX < -textWidth(marqueeText)) {
     marqueeX = width; 
   }
-  
-  pop(); // Mengembalikan setting gaya semula
+  pop();
 }
 
-// 5. LOGIKA DETEKSI GESTURE
-// 5. LOGIKA DETEKSI GESTURE RESPONSIF BERDASARKAN DIAGRAM ML5.JS
 function checkGestures() {
-  
-  // ------------------------------------------------------------------
-  // JIKA TERDETEKSI 2 TANGAN SEKALIGUS
-  // ------------------------------------------------------------------
   if (hands.length === 2) {
     let hand1 = hands[0].keypoints;
     let hand2 = hands[1].keypoints;
@@ -306,7 +268,7 @@ function checkGestures() {
     if (rTip2.y < hand2[14].y) fingersOpen2++; 
     if (pTip2.y < hand2[18].y) fingersOpen2++; 
 
-    // 1. GESTURE 2 JEMPOL 👍👍
+    //thumbsup
     let isThumbUp1 = (tTip1.y < hand1[3].y) && (fingersOpen1 === 0);
     let isThumbUp2 = (tTip2.y < hand2[3].y) && (fingersOpen2 === 0);
 
@@ -316,24 +278,23 @@ function checkGestures() {
       return; 
     }
 
-    // 2. GESTURE WAVE / LAMBAIAN (2 Tangan) 👋👋
+    //wave
     if (fingersOpen1 >= 3 && fingersOpen2 >= 3) {
       currentSubtitle = "Happy Last Dayyy";
       currentGesture = "wave";
       return;
     }
 
-    // 4. GESTURE LOVE 2 TANGAN 🫶 (Diturunkan prioritasnya agar tidak mendominasi)
+    //love
     let dIndex = dist(iTip1.x, iTip1.y, iTip2.x, iTip2.y);
     let dThumb = dist(tTip1.x, tTip1.y, tTip2.x, tTip2.y);
-    if (dIndex < 45 && dThumb < 55) { // Sedikit diperketat jaraknya agar tidak gampang salah deteksi
+    if (dIndex < 45 && dThumb < 55) {
       currentSubtitle = "Thank You for Being Awesome";
       currentGesture = "love";
       return;
     }
 
-    // 3. BARU: PERBAIKAN LOGIKA TYPING ⌨️ (Dinaikkan urutannya agar dicek lebih dulu dari love)
-    // Mengecek apakah posisi tangan mendatar ke bawah (seperti mengetik di meja)
+    //typing
     let dWrists = dist(wrist1.x, wrist1.y, wrist2.x, wrist2.y);
     let wristYDiff = abs(wrist1.y - wrist2.y);
     if (dWrists < 180 && wristYDiff < 50 && iTip1.y > hand1[6].y && iTip2.y > hand2[6].y) {
@@ -343,27 +304,23 @@ function checkGestures() {
     }
   } 
   
-  // ------------------------------------------------------------------
-  // JIKA HANYA TERDETEKSI 1 TANGAN
-  // ------------------------------------------------------------------
   // else if (hands.length === 1) {
   //   let hand = hands[0].keypoints;
     
-  //   let tTip = hand[4];  // Jempol
-  //   let iTip = hand[8];  // Telunjuk
-  //   let mTip = hand[12]; // Tengah
-  //   let rTip = hand[16]; // Manis
-  //   let pTip = hand[20]; // Kelingking
+  //   let tTip = hand[4];  //jempol
+  //   let iTip = hand[8];  //telunjuk
+  //   let mTip = hand[12]; //tengah
+  //   let rTip = hand[16]; //manis
+  //   let pTip = hand[20]; //kelingking
 
-  //   // Hitung jumlah jari terbuka pada 1 tangan ini
+  //   //jumlah jari terbuka
   //   let fingersOpen = 0;
   //   if (iTip.y < hand[6].y)  fingersOpen++;
   //   if (mTip.y < hand[10].y) fingersOpen++;
   //   if (rTip.y < hand[14].y) fingersOpen++;
   //   if (pTip.y < hand[18].y) fingersOpen++;
 
-  //   // KONDISI A: GESTURE LOVE 1 TANGAN (Finger Heart K-Pop) 🫰
-  //   // Ujung jempol (4) menempel dekat dengan ujung telunjuk (8), tapi jari lainnya menekuk mengepal
+  //   //(4) side byside (8)
   //   let dLove = dist(tTip.x, tTip.y, iTip.x, iTip.y);
   //   if (dLove < 35 && fingersOpen <= 1) {
   //     currentSubtitle = "thank you for being awesome";
@@ -371,28 +328,22 @@ function checkGestures() {
   //     return;
   //   }
 
-  //   // KONDISI B: GESTURE LAMBAIAN 1 TANGAN 👋
-  //   // Jika semua jari terbuka lebar ke atas
+  //   //if semua jari terbuka lebar ke atas
   //   if (fingersOpen >= 3) {
   //     currentSubtitle = "Happy Last Dayyy!";
   //     currentGesture = "wave";
   //     return;
   //   }
 
-  //   // Tampilan petunjuk jika posisi 1 tangan menggantung
-  //   // currentSubtitle = "Lambaikan tangan (Wave) atau buat Finger Heart!";
+  //   // currentSubtitle = "Hiduff arii lambaikan tangan";
   // } 
-  
-  // ------------------------------------------------------------------
-  // JIKA TIDAK ADA TANGAN SAMA SEKALI (STANDBY)
-  // ------------------------------------------------------------------
   else {
     currentSubtitle = "Happy Last Dayyy"; 
     currentGesture = "wave";
   }
 }
 
-// Menggambar Titik Sendi Jari
+//gambar sendi
 function drawHandPoints(camX, camY, camW, camH) {
   for (let h = 0; h < hands.length; h++) {
     let landmarks = hands[h].keypoints; 
