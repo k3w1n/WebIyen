@@ -99,7 +99,7 @@ function setup() {
   console.log("Scanning polkadot:", points.length);
 }
 function modelLoaded() {
-  console.log("Model Handpose berhasil dimuat! Memulai deteksi...");
+  console.log("Handpose berhasil dimuat mereunn...");
   handpose.detectStart(video, gotHands);
 }
 
