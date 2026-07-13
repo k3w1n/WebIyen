@@ -235,7 +235,7 @@ function draw() {
   textFont(customFontSub);
   textAlign(LEFT, CENTER);
   
-  let marqueeText = "Final round, final laugh. BIIRU - Not A Sushibar, July 13 – Ari’s farewell bash!";
+  let marqueeText = "Final round, final laugh. at BIIRU - Not A Sushibar, July 13 – Ari’s farewell bash!";
   text(marqueeText, marqueeX, height - 50);
   marqueeX -= 3.5;
   // textWidth()
